@@ -76,7 +76,9 @@
             android:background="@drawable/pill_bg"
             android:hint="Email Address"
             android:inputType="textEmailAddress"
+            android:id="@+id/etEmail"
             android:paddingHorizontal="24dp"
+            android:textColor="@color/black"
             android:textColorHint="#8E99AF" />
 
         <!-- Password Input -->
@@ -87,7 +89,9 @@
             android:background="@drawable/pill_bg"
             android:hint="Password"
             android:inputType="textPassword"
+            android:id="@+id/etPassword"
             android:paddingHorizontal="24dp"
+            android:textColor="@color/black"
             android:textColorHint="#8E99AF" />
 
         <TextView
@@ -138,6 +142,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/tv_signup"
             android:layout_gravity="center"
             android:layout_marginTop="24dp"
             android:text="Don't have an account? Sign Up"
