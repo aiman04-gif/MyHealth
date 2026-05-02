@@ -19,10 +19,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUp extends AppCompatActivity {
 
     private FirebaseAuth auth;
+    private FirebaseDatabase rtdb;
     private EditText etFullName, etEmail, etPassword, etCPassword;
     private View btn_signUp;
     private TextView tv_login;
@@ -39,6 +41,9 @@ public class SignUp extends AppCompatActivity {
         });
         init();
         auth= FirebaseAuth.getInstance();
+        rtdb=FirebaseDatabase.getInstance(
+                "https://myhealth-b7de0-default-rtdb.firebaseio.com/"
+        );
 
         tv_login.setOnClickListener(v->{
             Intent i = new Intent(SignUp.this, Login.class);
@@ -68,17 +73,25 @@ public class SignUp extends AppCompatActivity {
                 Toast.makeText(this,"Password and Confirm Password should be same",Toast.LENGTH_SHORT).show();
             }else
             {
-                auth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(SignUp.this, "Signup Successful", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(SignUp.this, Login.class));
-                        }else{
-                            Toast.makeText(SignUp.this, "Sign Up unsuccessful"+task.getException(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                auth.createUserWithEmailAndPassword(email,password).addOnSuccessListener(result->{
+                    String uid=result.getUser().getUid();
+                    User user= new User(uid,name,email);
+
+                    rtdb.getReference("users")
+                            .child(uid)
+                            .setValue(user)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Account Created!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(SignUp.this, Login.class));
+                                finish();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "DB Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            );
+
+                }).addOnFailureListener(e ->
+                        Toast.makeText(this, "Signup Failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
             }
 
         });
