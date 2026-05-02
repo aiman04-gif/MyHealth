@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.myhealth.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_doctors"
+        android:name="com.example.myhealth.DoctorFragment"
+        android:label="Doctors"
+        tools:layout="@layout/fragment_doctor"
+        />
+    <fragment
+        android:id="@+id/nav_appointments"
+        android:name="com.example.myhealth.AppointmentFragment"
+        android:label="Appointment"
+        tools:layout="@layout/fragment_appointment"
+        />
+    <fragment
+        android:id="@+id/nav_stats"
+        android:name="com.example.myhealth.StatsFragment"
+        android:label="Statistics"
+        tools:layout="@layout/fragment_stats"
+        />
+
+
+    <!-- Add other fragments like nav_doctors, nav_stats here later -->
+
+</navigation>
