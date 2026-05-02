@@ -23,6 +23,13 @@
         android:label="Appointment"
         tools:layout="@layout/fragment_appointment"
         />
+    <fragment
+        android:id="@+id/nav_stats"
+        android:name="com.example.myhealth.StatsFragment"
+        android:label="Statistics"
+        tools:layout="@layout/fragment_stats"
+        />
+
 
     <!-- Add other fragments like nav_doctors, nav_stats here later -->
 
