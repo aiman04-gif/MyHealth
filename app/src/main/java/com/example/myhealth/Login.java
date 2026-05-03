@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,7 @@ public class Login extends AppCompatActivity {
     private EditText etEmail, etPassword;
     private TextView tv_signup;
     private View btn_login;
+    private Button btnGoToDoctorLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +105,11 @@ public class Login extends AppCompatActivity {
             Intent i = new Intent(Login.this, SignUp.class);
             startActivity(i);
         });
+
+        btnGoToDoctorLogin.setOnClickListener(v->{
+           startActivity(new Intent(Login.this, DoctorLogin.class));
+           finish();
+        });
     }
 
     private void init()
@@ -111,5 +118,6 @@ public class Login extends AppCompatActivity {
         etEmail=findViewById(R.id.etEmail);
         etPassword=findViewById(R.id.etPassword);
         btn_login= findViewById(R.id.btn_login);
+        btnGoToDoctorLogin=findViewById(R.id.btnGoToDoctorLogin);
     }
 }

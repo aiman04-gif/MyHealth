@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="8dp"
+    android:layout_marginHorizontal="4dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:backgroundTint="#F2F5FF"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Time Badge -->
+        <TextView
+            android:id="@+id/tvApptTime"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pill_bg"
+            android:backgroundTint="#E3F2FD"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="10:30 AM"
+            android:textColor="#1E88E5"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvPatientName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="John Doe"
+                android:textColor="#102A43"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvApptDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="May 24, 2024"
+                android:textColor="#627D98"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_forward"
+            app:tint="#BCCCDC" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

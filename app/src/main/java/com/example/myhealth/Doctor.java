@@ -3,14 +3,31 @@ package com.example.myhealth;
 import java.util.List;
 
 public class Doctor {
+    private String uid;
+    private String email;
     private String name;
-    private final int experienceYears;
-    private final double rating;
-    private final int reviewCount;
-    private final List<String> specializationTags;
-    private final String about;
-    private final int consultationFeeUsd;
+    private int experienceYears;
+    private double rating;
+    private int reviewCount;
+    private List<String> specializationTags;
+    private String about;
+    private int consultationFeeUsd;
 
+    public Doctor() {}
+
+    public Doctor(String uid, String name, String email,
+                  int experienceYears, double rating, int reviewCount,
+                  List<String> specializationTags, String about, int consultationFeeUsd) {
+        this.uid = uid;
+        this.name = name;
+        this.email = email;
+        this.experienceYears = experienceYears;
+        this.rating = rating;
+        this.reviewCount = reviewCount;
+        this.specializationTags = specializationTags;
+        this.about = about;
+        this.consultationFeeUsd = consultationFeeUsd;
+    }
 
     public Doctor(String name, int experienceYears, double rating, int reviewCount, List<String> specializationTags, String about, int consultationFeeUsd) {
         this.name = name;

@@ -7,6 +7,19 @@
     android:layout_height="match_parent"
     android:background="#F2F5FF">
 
+    <Button
+        android:id="@+id/btnGoToDoctorLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Doctor Login"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp" />
 
     <!-- 2. TOP SECTION: BRANDING/ICON -->
     <LinearLayout
