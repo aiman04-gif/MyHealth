@@ -1,5 +1,7 @@
 package com.example.smd_project_v1;
 
+import com.example.myhealth.R;
+
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.InputType;

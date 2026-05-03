@@ -1,5 +1,7 @@
 package com.example.smd_project_v1;
 
+import com.example.myhealth.R;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;

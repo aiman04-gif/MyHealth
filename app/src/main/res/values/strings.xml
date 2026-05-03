@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">SMD_project_V1</string>
+    <string name="app_name">MyHealth</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <!-- Doctor detail -->
     <string name="doctor_detail_about_heading">About</string>
     <string name="doctor_detail_about_body_dummy">Board-certified cardiologist focused on preventive care, adult heart disease, and long-term cardiac management.</string>
     <string name="consultation_fee_label">Consultation Fee</string>
@@ -76,7 +76,6 @@
     <string name="profile_menu_payment_methods">Payment Methods</string>
     <string name="profile_menu_support">Help &amp; Support</string>
 
-    <!-- Content descriptions -->
     <string name="cd_back">Back</string>
     <string name="cd_favorite">Add to favorites</string>
     <string name="cd_doctor_photo">Doctor photo</string>

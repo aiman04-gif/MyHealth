@@ -19,6 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SMD_project_V1"
+rootProject.name = "MyHealth"
 include(":app")
- 

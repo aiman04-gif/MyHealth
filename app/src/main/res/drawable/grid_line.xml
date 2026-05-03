@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- The line color: very light grey -->
+    <stroke
+        android:width="0.5dp"
+        android:color="#12000000" />
+
+    <!-- The size of each square in the grid -->
+    <size
+        android:width="60dp"
+        android:height="60dp" />
+</shape>
