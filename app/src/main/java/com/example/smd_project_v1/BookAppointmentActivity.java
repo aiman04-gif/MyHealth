@@ -161,7 +161,10 @@ public class BookAppointmentActivity extends AppCompatActivity {
     private void saveAppointment() {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
-        String patientUid = firebaseUser != null ? firebaseUser.getUid() : sp.getString("user_uid", "");
+        String patientUid = sp.getString("user_uid", "");
+        if (patientUid == null || patientUid.trim().isEmpty()) {
+            patientUid = firebaseUser != null ? firebaseUser.getUid() : "";
+        }
         String patientName = sp.getString("user_name", "");
 
         if (patientUid == null || patientUid.trim().isEmpty()) {

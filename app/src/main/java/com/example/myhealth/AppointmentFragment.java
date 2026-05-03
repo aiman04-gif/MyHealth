@@ -74,13 +74,14 @@ public class AppointmentFragment extends Fragment {
     }
 
     private String getPatientUid() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            return user.getUid();
-        }
         SharedPreferences sp = requireActivity()
                 .getSharedPreferences("user_session", Context.MODE_PRIVATE);
-        return sp.getString("user_uid", "");
+        String sessionUid = sp.getString("user_uid", "");
+        if (sessionUid != null && !sessionUid.trim().isEmpty()) {
+            return sessionUid;
+        }
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return user != null ? user.getUid() : "";
     }
 
     private View createAppointmentCard(Appointment appointment) {

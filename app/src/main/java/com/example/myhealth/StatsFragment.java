@@ -1,8 +1,10 @@
 package com.example.myhealth;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
@@ -27,6 +29,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
@@ -55,6 +58,8 @@ public class StatsFragment extends Fragment {
     private MaterialButton bloodPressureTabButton;
     private MaterialButton oxygenTabButton;
     private MaterialButton addStatsButton;
+    private Query statsQuery;
+    private ValueEventListener statsListener;
     private StatType selectedStatType = StatType.HEART_RATE;
 
     public StatsFragment() {
@@ -95,6 +100,16 @@ public class StatsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        if (statsQuery != null && statsListener != null) {
+            statsQuery.removeEventListener(statsListener);
+        }
+        statsQuery = null;
+        statsListener = null;
+        super.onDestroyView();
+    }
+
     private void listenForFirebaseStats() {
         String patientUid = getPatientUid();
         if (patientUid == null || patientUid.trim().isEmpty()) {
@@ -102,12 +117,16 @@ public class StatsFragment extends Fragment {
             return;
         }
 
-        FirebaseDatabase.getInstance().getReference("health_stats")
+        statsQuery = FirebaseDatabase.getInstance().getReference("health_stats")
                 .child(patientUid)
-                .orderByChild("createdAt")
-                .addValueEventListener(new ValueEventListener() {
+                .orderByChild("createdAt");
+
+        statsListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (!isAdded() || getView() == null) {
+                            return;
+                        }
                         List<HealthStat> stats = new ArrayList<>();
                         for (DataSnapshot child : snapshot.getChildren()) {
                             HealthStat stat = child.getValue(HealthStat.class);
@@ -120,12 +139,18 @@ public class StatsFragment extends Fragment {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(requireContext(), "Unable to load stats", Toast.LENGTH_SHORT).show();
+                        if (isAdded()) {
+                            Toast.makeText(requireContext(), "Unable to load stats", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                });
+                };
+        statsQuery.addValueEventListener(statsListener);
     }
 
     private void applyStats(List<HealthStat> stats) {
+        if (!isAdded() || getView() == null) {
+            return;
+        }
         clearWeeklyData();
         if (stats.isEmpty()) {
             showEmptyStats();
@@ -150,6 +175,9 @@ public class StatsFragment extends Fragment {
     }
 
     private void showEmptyStats() {
+        if (!isAdded() || textHeartRateValue == null) {
+            return;
+        }
         clearWeeklyData();
         textHeartRateValue.setText("No data");
         textBloodPressureValue.setText("No data");
@@ -253,26 +281,85 @@ public class StatsFragment extends Fragment {
 
         ref.setValue(stat)
                 .addOnSuccessListener(unused -> {
+                    if (!isAdded()) {
+                        return;
+                    }
                     dialog.dismiss();
-                    Toast.makeText(requireContext(), "Stats saved", Toast.LENGTH_SHORT).show();
+                    if (hasAlarmVitals(heartRate, bpSystolic, bpDiastolic, oxygen)) {
+                        showVitalsAlert(heartRate, bpSystolic, bpDiastolic, oxygen);
+                    } else {
+                        Toast.makeText(requireContext(), "Stats saved", Toast.LENGTH_SHORT).show();
+                    }
                 })
-                .addOnFailureListener(error -> Toast.makeText(
-                        requireContext(),
-                        error.getMessage() != null ? error.getMessage() : "Unable to save stats",
-                        Toast.LENGTH_SHORT
-                ).show());
+                .addOnFailureListener(error -> {
+                    if (isAdded()) {
+                        Toast.makeText(
+                                requireContext(),
+                                error.getMessage() != null ? error.getMessage() : "Unable to save stats",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
+    }
+
+    private boolean hasAlarmVitals(int heartRate, int bpSystolic, int bpDiastolic, int oxygen) {
+        return heartRate < 60
+                || heartRate > 100
+                || bpSystolic < 90
+                || bpSystolic >= 140
+                || bpDiastolic < 60
+                || bpDiastolic >= 90
+                || oxygen < 95;
+    }
+
+    private void showVitalsAlert(int heartRate, int bpSystolic, int bpDiastolic, int oxygen) {
+        StringBuilder message = new StringBuilder();
+        message.append("Some entered vitals look outside the usual range. Please consider visiting a doctor.\n\n");
+
+        if (heartRate < 60) {
+            message.append("Heart Rate: Low (").append(heartRate).append(" BPM)\n");
+        } else if (heartRate > 100) {
+            message.append("Heart Rate: High (").append(heartRate).append(" BPM)\n");
+        }
+
+        if (bpSystolic < 90 || bpDiastolic < 60) {
+            message.append("Blood Pressure: Low (").append(bpSystolic).append("/").append(bpDiastolic).append(" mmHg)\n");
+        } else if (bpSystolic >= 140 || bpDiastolic >= 90) {
+            message.append("Blood Pressure: High (").append(bpSystolic).append("/").append(bpDiastolic).append(" mmHg)\n");
+        }
+
+        if (oxygen < 95) {
+            message.append("Oxygen Level: Low (").append(oxygen).append("%)\n");
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Health Alert")
+                .setMessage(message.toString().trim())
+                .setPositiveButton("Call Emergency", (d, which) -> callEmergency())
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private void callEmergency() {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:1122"));
+        startActivity(intent);
     }
 
     private String getPatientUid() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            return user.getUid();
-        }
         SharedPreferences sp = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
-        return sp.getString("user_uid", "");
+        String sessionUid = sp.getString("user_uid", "");
+        if (sessionUid != null && !sessionUid.trim().isEmpty()) {
+            return sessionUid;
+        }
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return user != null ? user.getUid() : "";
     }
 
     private void updateWeeklyGraph(StatType statType) {
+        if (!isAdded() || getContext() == null || layoutWeeklyBars == null) {
+            return;
+        }
         selectedStatType = statType;
         int[] values = getValues(statType);
         textWeeklyStatTitle.setText(statType.title);
@@ -298,6 +385,9 @@ public class StatsFragment extends Fragment {
     }
 
     private void styleTab(MaterialButton button, boolean selected) {
+        if (button == null || getContext() == null) {
+            return;
+        }
         int themePrimary = ContextCompat.getColor(requireContext(), R.color.theme_primary);
         int white = ContextCompat.getColor(requireContext(), R.color.white);
         int black = ContextCompat.getColor(requireContext(), R.color.black);
@@ -309,6 +399,9 @@ public class StatsFragment extends Fragment {
     }
 
     private void renderBars(int[] values) {
+        if (!isAdded() || getContext() == null || layoutWeeklyBars == null) {
+            return;
+        }
         layoutWeeklyBars.removeAllViews();
 
         int maxValue = Math.max(1, getMax(values));

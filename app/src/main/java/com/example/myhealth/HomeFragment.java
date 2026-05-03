@@ -129,6 +129,9 @@ public class HomeFragment extends Fragment {
                             if (appointment == null) {
                                 continue;
                             }
+                            if (isCompleted(appointment)) {
+                                continue;
+                            }
                             if (latestAppointment == null
                                     || appointment.getCreatedAt() >= latestAppointment.getCreatedAt()) {
                                 latestAppointment = appointment;
@@ -154,12 +157,13 @@ public class HomeFragment extends Fragment {
     }
 
     private String getPatientUid() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            return user.getUid();
-        }
         SharedPreferences sp = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
-        return sp.getString("user_uid", "");
+        String sessionUid = sp.getString("user_uid", "");
+        if (sessionUid != null && !sessionUid.trim().isEmpty()) {
+            return sessionUid;
+        }
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return user != null ? user.getUid() : "";
     }
 
     private void showNoAppointment() {
@@ -169,5 +173,10 @@ public class HomeFragment extends Fragment {
 
     private String safeText(String value, String fallback) {
         return value == null || value.trim().isEmpty() ? fallback : value;
+    }
+
+    private boolean isCompleted(Appointment appointment) {
+        String status = appointment.getStatus();
+        return "Done".equalsIgnoreCase(status) || "Completed".equalsIgnoreCase(status);
     }
 }
