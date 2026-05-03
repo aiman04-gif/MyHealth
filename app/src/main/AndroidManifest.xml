@@ -12,6 +12,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyHealth">
         <activity
+            android:name=".DoctorProfile"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity2"
+            android:exported="false" />
+        <activity
+            android:name=".DoctorDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".DoctorSignUp"
+            android:exported="false" />
+        <activity
+            android:name=".DoctorLogin"
+            android:exported="false" />
+        <activity
             android:name=".HomePage"
             android:exported="false" />
         <activity

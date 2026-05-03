@@ -1,19 +1,23 @@
 package com.example.myhealth;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -22,8 +26,8 @@ public class SignUp extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseDatabase rtdb;
     private EditText etFullName, etEmail, etPassword, etCPassword;
-    private View btn_signUp, progressSignup;
-    private TextView tv_login, textSignupButton;
+    private View btn_signUp;
+    private TextView tv_login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,21 +59,20 @@ public class SignUp extends AppCompatActivity {
 
             if(name.isEmpty())
             {
-                showAlert(R.string.validation_title, "Name can not be empty");
+                etFullName.setError("Name can not be empty");
             }else if(email.isEmpty())
             {
-                showAlert(R.string.validation_title, "Email can not be empty");
+                etEmail.setError("Email can not be empty");
             }else if(password.isEmpty())
             {
-                showAlert(R.string.validation_title, "Password can not be empty");
+                etPassword.setError("Password can not be empty");
             }else if(cpassword.isEmpty())
             {
-                showAlert(R.string.validation_title, "Confirm Password can not be empty");
+                etCPassword.setError("Password can not be empty");
             }else if(!password.equals(cpassword)){
-                showAlert(R.string.validation_title, "Password and Confirm Password should be same");
+                Toast.makeText(this,"Password and Confirm Password should be same",Toast.LENGTH_SHORT).show();
             }else
             {
-                setLoading(true);
                 auth.createUserWithEmailAndPassword(email,password).addOnSuccessListener(result->{
                     String uid=result.getUser().getUid();
                     User user= new User(uid,name,email);
@@ -78,18 +81,17 @@ public class SignUp extends AppCompatActivity {
                             .child(uid)
                             .setValue(user)
                             .addOnSuccessListener(aVoid -> {
-                                saveUserSession(uid, email, name);
-                                openHomePage();
+                                Toast.makeText(this, "Account Created!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(SignUp.this, Login.class));
+                                finish();
                             })
-                            .addOnFailureListener(e -> {
-                                setLoading(false);
-                                showAlert(R.string.error_title, "DB Error: " + e.getMessage());
-                            });
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "DB Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            );
 
-                }).addOnFailureListener(e -> {
-                    setLoading(false);
-                    showAlert(R.string.error_title, "Signup Failed: " + e.getMessage());
-                });
+                }).addOnFailureListener(e ->
+                        Toast.makeText(this, "Signup Failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
             }
 
         });
@@ -103,43 +105,5 @@ public class SignUp extends AppCompatActivity {
         etPassword=findViewById(R.id.etPassword);
         etCPassword=findViewById(R.id.etCPassword);
         btn_signUp=findViewById(R.id.btn_signup);
-        textSignupButton=findViewById(R.id.text_signup_button);
-        progressSignup=findViewById(R.id.progress_signup);
-    }
-
-    private void saveUserSession(String uid, String email, String name) {
-        SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
-        sp.edit()
-                .putBoolean("logged_in", true)
-                .putString("user_uid", uid)
-                .putString("user_email", email)
-                .putString("user_name", name)
-                .apply();
-    }
-
-    private void openHomePage() {
-        Intent intent = new Intent(SignUp.this, HomePage.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
-    }
-
-    private void setLoading(boolean loading) {
-        btn_signUp.setEnabled(!loading);
-        tv_login.setEnabled(!loading);
-        etFullName.setEnabled(!loading);
-        etEmail.setEnabled(!loading);
-        etPassword.setEnabled(!loading);
-        etCPassword.setEnabled(!loading);
-        textSignupButton.setVisibility(loading ? View.GONE : View.VISIBLE);
-        progressSignup.setVisibility(loading ? View.VISIBLE : View.GONE);
-    }
-
-    private void showAlert(int titleResId, String message) {
-        new AlertDialog.Builder(this)
-                .setTitle(titleResId)
-                .setMessage(message != null ? message : getString(R.string.error_title))
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
-                .show();
     }
 }
