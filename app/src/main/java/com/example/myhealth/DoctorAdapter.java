@@ -13,11 +13,18 @@ import java.util.List;
 
 public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorViewHolder> {
 
+    public interface OnDoctorClickListener {
+        void onDoctorClick(Doctor doctor);
+    }
+
     private List<Doctor> doctorList;
     private List<Doctor> doctorListFull;
-    public DoctorAdapter(List<Doctor> doctorList)
+    private final OnDoctorClickListener listener;
+
+    public DoctorAdapter(List<Doctor> doctorList, OnDoctorClickListener listener)
     {
         this.doctorList=doctorList;
+        this.listener = listener;
         doctorListFull= new ArrayList<>(doctorList);
     }
 
@@ -35,6 +42,16 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
 
         holder.tvName.setText(doc.getName());
         holder.tvSpeciality.setText(doc.getSpecializationTags().get(0));
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onDoctorClick(doc);
+            }
+        });
+        holder.btnGo.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onDoctorClick(doc);
+            }
+        });
     }
 
     @Override
@@ -61,11 +78,13 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
 
     public static class DoctorViewHolder extends RecyclerView.ViewHolder{
             TextView tvName, tvSpeciality;
+            View btnGo;
 
             public DoctorViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvName=itemView.findViewById(R.id.tvDoctorName);
                 tvSpeciality=itemView.findViewById(R.id.tvSpecialty);
+                btnGo=itemView.findViewById(R.id.btnGo);
             }
         }
 }

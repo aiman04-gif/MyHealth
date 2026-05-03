@@ -49,6 +49,7 @@
 
         <!-- Main Schedule Card (Reinterpreting the blue card with the grid theme) -->
         <LinearLayout
+            android:id="@+id/upcomingConsultation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"

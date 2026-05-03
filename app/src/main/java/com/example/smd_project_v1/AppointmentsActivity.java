@@ -46,10 +46,10 @@ public class AppointmentsActivity extends AppCompatActivity {
             startActivity(intent);
         });
         navStatisticsButton.setOnClickListener(v ->
-                openOrShowPending(getPackageName() + ".StatisticsActivity", R.string.statistics_screen_pending)
+                startActivity(new Intent(this, StatisticsActivity.class))
         );
         navProfileButton.setOnClickListener(v ->
-                openOrShowPending(getPackageName() + ".ProfileActivity", R.string.profile_screen_pending)
+                startActivity(new Intent(this, ProfileActivity.class))
         );
     }
 
@@ -60,16 +60,6 @@ public class AppointmentsActivity extends AppCompatActivity {
 
         if (appointmentDate != null && appointmentTime != null) {
             appointmentDateTimeText.setText(appointmentDate + " - " + appointmentTime);
-        }
-    }
-
-    private void openOrShowPending(String className, int toastResId) {
-        Intent intent = new Intent();
-        intent.setClassName(this, className);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, toastResId, Toast.LENGTH_SHORT).show();
         }
     }
 }

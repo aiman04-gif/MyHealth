@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2F5FF">
+    android:background="@color/background_page">
 
 
     <!-- 2. TOP SECTION: BRANDING/ICON -->

@@ -109,6 +109,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
             strokePx = 1;
         }
 
+        int themePrimary = ContextCompat.getColor(this, R.color.theme_primary);
         int black = ContextCompat.getColor(this, R.color.black);
         int white = ContextCompat.getColor(this, R.color.white);
 
@@ -116,12 +117,12 @@ public class BookAppointmentActivity extends AppCompatActivity {
             boolean selected = selectedTimeSlotButton != null && btn == selectedTimeSlotButton;
             if (selected) {
                 btn.setStrokeWidth(0);
-                btn.setStrokeColor(ColorStateList.valueOf(black));
-                btn.setBackgroundTintList(ColorStateList.valueOf(black));
+                btn.setStrokeColor(ColorStateList.valueOf(themePrimary));
+                btn.setBackgroundTintList(ColorStateList.valueOf(themePrimary));
                 btn.setTextColor(white);
             } else {
                 btn.setStrokeWidth(strokePx);
-                btn.setStrokeColor(ColorStateList.valueOf(black));
+                btn.setStrokeColor(ColorStateList.valueOf(themePrimary));
                 btn.setBackgroundTintList(ColorStateList.valueOf(white));
                 btn.setTextColor(black);
             }

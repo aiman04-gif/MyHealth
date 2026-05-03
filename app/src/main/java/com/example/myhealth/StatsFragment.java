@@ -1,64 +1,268 @@
 package com.example.myhealth;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link StatsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.button.MaterialButton;
+
 public class StatsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String[] WEEK_DAYS = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    private static final int[] HEART_RATE_DATA = {72, 75, 80, 78, 74, 76, 73};
+    private static final int[] BLOOD_PRESSURE_DATA = {120, 118, 122, 119, 121, 117, 120};
+    private static final int[] OXYGEN_DATA = {98, 97, 99, 98, 96, 98, 97};
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private TextView textHeartRateValue;
+    private TextView textBloodPressureValue;
+    private TextView textOxygenLevelValue;
+    private TextView textWeeklyStatTitle;
+    private TextView textWeeklyAverage;
+    private LinearLayout layoutWeeklyBars;
+    private MaterialButton heartRateTabButton;
+    private MaterialButton bloodPressureTabButton;
+    private MaterialButton oxygenTabButton;
 
     public StatsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StatsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static StatsFragment newInstance(String param1, String param2) {
-        StatsFragment fragment = new StatsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_stats, container, false);
+        View view = inflater.inflate(R.layout.fragment_stats, container, false);
+
+        LinearLayout heartRateCard = view.findViewById(R.id.card_heart_rate);
+        LinearLayout bloodPressureCard = view.findViewById(R.id.card_blood_pressure);
+        LinearLayout oxygenLevelCard = view.findViewById(R.id.card_oxygen_level);
+
+        textHeartRateValue = view.findViewById(R.id.text_heart_rate_value);
+        textBloodPressureValue = view.findViewById(R.id.text_blood_pressure_value);
+        textOxygenLevelValue = view.findViewById(R.id.text_oxygen_level_value);
+        textWeeklyStatTitle = view.findViewById(R.id.text_weekly_stat_title);
+        textWeeklyAverage = view.findViewById(R.id.text_weekly_average);
+        layoutWeeklyBars = view.findViewById(R.id.layout_weekly_bars);
+        heartRateTabButton = view.findViewById(R.id.button_tab_heart_rate);
+        bloodPressureTabButton = view.findViewById(R.id.button_tab_blood_pressure);
+        oxygenTabButton = view.findViewById(R.id.button_tab_oxygen);
+
+        heartRateCard.setOnClickListener(v ->
+                showEditDialog(
+                        getString(R.string.edit_heart_rate_title),
+                        textHeartRateValue,
+                        InputType.TYPE_CLASS_NUMBER,
+                        ValueType.NUMBER_ONLY
+                )
+        );
+
+        bloodPressureCard.setOnClickListener(v ->
+                showEditDialog(
+                        getString(R.string.edit_blood_pressure_title),
+                        textBloodPressureValue,
+                        InputType.TYPE_CLASS_TEXT,
+                        ValueType.BLOOD_PRESSURE
+                )
+        );
+
+        oxygenLevelCard.setOnClickListener(v ->
+                showEditDialog(
+                        getString(R.string.edit_oxygen_level_title),
+                        textOxygenLevelValue,
+                        InputType.TYPE_CLASS_NUMBER,
+                        ValueType.NUMBER_ONLY
+                )
+        );
+
+        heartRateTabButton.setOnClickListener(v -> updateWeeklyGraph(StatType.HEART_RATE));
+        bloodPressureTabButton.setOnClickListener(v -> updateWeeklyGraph(StatType.BLOOD_PRESSURE));
+        oxygenTabButton.setOnClickListener(v -> updateWeeklyGraph(StatType.OXYGEN));
+        updateWeeklyGraph(StatType.HEART_RATE);
+
+        return view;
+    }
+
+    private void updateWeeklyGraph(StatType statType) {
+        textWeeklyStatTitle.setText(statType.title);
+        textWeeklyAverage.setText("Avg " + getAverage(statType.values) + statType.averageSuffix);
+        updateTabStyles(statType);
+        renderBars(statType.values);
+    }
+
+    private void updateTabStyles(StatType selectedType) {
+        styleTab(heartRateTabButton, selectedType == StatType.HEART_RATE);
+        styleTab(bloodPressureTabButton, selectedType == StatType.BLOOD_PRESSURE);
+        styleTab(oxygenTabButton, selectedType == StatType.OXYGEN);
+    }
+
+    private void styleTab(MaterialButton button, boolean selected) {
+        int themePrimary = ContextCompat.getColor(requireContext(), R.color.theme_primary);
+        int white = ContextCompat.getColor(requireContext(), R.color.white);
+        int black = ContextCompat.getColor(requireContext(), R.color.black);
+
+        button.setBackgroundTintList(ColorStateList.valueOf(selected ? themePrimary : white));
+        button.setTextColor(selected ? white : black);
+        button.setStrokeColor(ColorStateList.valueOf(themePrimary));
+        button.setStrokeWidth(selected ? 0 : dp(1));
+    }
+
+    private void renderBars(int[] values) {
+        layoutWeeklyBars.removeAllViews();
+
+        int minValue = getMin(values);
+        int maxValue = getMax(values);
+        int valueRange = Math.max(1, maxValue - minValue);
+        int barAreaHeight = dp(124);
+        int minBarHeight = dp(18);
+
+        for (int i = 0; i < values.length; i++) {
+            LinearLayout column = new LinearLayout(requireContext());
+            column.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+            column.setOrientation(LinearLayout.VERTICAL);
+            column.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f));
+
+            TextView valueText = new TextView(requireContext());
+            valueText.setText(String.valueOf(values[i]));
+            valueText.setGravity(Gravity.CENTER);
+            valueText.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
+            valueText.setTextSize(11);
+
+            FrameLayout barFrame = new FrameLayout(requireContext());
+            LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, barAreaHeight);
+            frameParams.topMargin = dp(4);
+            barFrame.setLayoutParams(frameParams);
+
+            View bar = new View(requireContext());
+            float normalizedValue = (values[i] - minValue) / (float) valueRange;
+            int barHeight = minBarHeight + Math.round(normalizedValue * (barAreaHeight - minBarHeight));
+            FrameLayout.LayoutParams barParams = new FrameLayout.LayoutParams(dp(18), barHeight);
+            barParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+            bar.setLayoutParams(barParams);
+            bar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.theme_primary));
+            barFrame.addView(bar);
+
+            TextView dayText = new TextView(requireContext());
+            dayText.setText(WEEK_DAYS[i]);
+            dayText.setGravity(Gravity.CENTER);
+            dayText.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+            dayText.setTextSize(12);
+
+            column.addView(valueText);
+            column.addView(barFrame);
+            column.addView(dayText);
+            layoutWeeklyBars.addView(column);
+        }
+    }
+
+    private void showEditDialog(String title, TextView targetValue, int inputType, ValueType valueType) {
+        EditText input = new EditText(requireContext());
+        input.setInputType(inputType);
+        input.setSingleLine(true);
+        input.setText(targetValue.getText().toString().trim());
+        input.setSelection(input.getText().length());
+        int padding = dp(16);
+        input.setPadding(padding, padding, padding, padding);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(title)
+                .setView(input)
+                .setPositiveButton(R.string.save, null)
+                .setNegativeButton(R.string.cancel, (d, which) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String value = input.getText().toString().trim();
+            if (isValidInput(value, valueType)) {
+                targetValue.setText(value);
+                dialog.dismiss();
+            } else {
+                Toast.makeText(requireContext(), getErrorMessage(valueType), Toast.LENGTH_SHORT).show();
+            }
+        }));
+
+        dialog.show();
+    }
+
+    private boolean isValidInput(String value, ValueType valueType) {
+        if (value.isEmpty()) {
+            return false;
+        }
+
+        if (valueType == ValueType.BLOOD_PRESSURE) {
+            return value.matches("^\\d{2,3}/\\d{2,3}$");
+        }
+
+        return value.matches("^\\d{1,3}$");
+    }
+
+    private int getErrorMessage(ValueType valueType) {
+        if (valueType == ValueType.BLOOD_PRESSURE) {
+            return R.string.invalid_blood_pressure;
+        }
+        return R.string.invalid_numeric_value;
+    }
+
+    private int getAverage(int[] values) {
+        int total = 0;
+        for (int value : values) {
+            total += value;
+        }
+        return Math.round(total / (float) values.length);
+    }
+
+    private int getMax(int[] values) {
+        int max = values[0];
+        for (int value : values) {
+            if (value > max) {
+                max = value;
+            }
+        }
+        return max;
+    }
+
+    private int getMin(int[] values) {
+        int min = values[0];
+        for (int value : values) {
+            if (value < min) {
+                min = value;
+            }
+        }
+        return min;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private enum ValueType {
+        NUMBER_ONLY,
+        BLOOD_PRESSURE
+    }
+
+    private enum StatType {
+        HEART_RATE("Heart Rate", HEART_RATE_DATA, " BPM"),
+        BLOOD_PRESSURE("Blood Pressure", BLOOD_PRESSURE_DATA, " mmHg"),
+        OXYGEN("Oxygen", OXYGEN_DATA, "%");
+
+        private final String title;
+        private final int[] values;
+        private final String averageSuffix;
+
+        StatType(String title, int[] values, String averageSuffix) {
+            this.title = title;
+            this.values = values;
+            this.averageSuffix = averageSuffix;
+        }
     }
 }

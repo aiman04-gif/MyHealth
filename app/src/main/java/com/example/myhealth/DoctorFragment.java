@@ -1,5 +1,6 @@
 package com.example.myhealth;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+
+import com.example.smd_project_v1.DoctorDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +53,10 @@ public class DoctorFragment extends Fragment {
         doctors.add(new Doctor("Dr Asad",1,2,5,specializationTags,"xyz",100));
 
         // Set the adapter
-        DoctorAdapter adapter = new DoctorAdapter(doctors);
+        DoctorAdapter adapter = new DoctorAdapter(doctors, doctor -> {
+            Intent intent = new Intent(requireContext(), DoctorDetailActivity.class);
+            startActivity(intent);
+        });
         rv.setAdapter(adapter);
 
         EditText etSearch = view.findViewById(R.id.etSearch);

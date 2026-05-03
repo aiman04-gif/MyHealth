@@ -118,13 +118,13 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private void styleTab(MaterialButton button, boolean selected) {
-        int black = ContextCompat.getColor(this, R.color.black);
+        int themePrimary = ContextCompat.getColor(this, R.color.theme_primary);
         int white = ContextCompat.getColor(this, R.color.white);
         int textPrimary = ContextCompat.getColor(this, R.color.text_primary);
 
-        button.setBackgroundTintList(ColorStateList.valueOf(selected ? black : white));
+        button.setBackgroundTintList(ColorStateList.valueOf(selected ? themePrimary : white));
         button.setTextColor(selected ? white : textPrimary);
-        button.setStrokeColor(ColorStateList.valueOf(black));
+        button.setStrokeColor(ColorStateList.valueOf(themePrimary));
         button.setStrokeWidth(selected ? 0 : dp(1));
     }
 
@@ -161,7 +161,7 @@ public class StatisticsActivity extends AppCompatActivity {
             FrameLayout.LayoutParams barParams = new FrameLayout.LayoutParams(dp(18), barHeight);
             barParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
             bar.setLayoutParams(barParams);
-            bar.setBackgroundColor(ContextCompat.getColor(this, R.color.black));
+            bar.setBackgroundColor(ContextCompat.getColor(this, R.color.theme_primary));
             barFrame.addView(bar);
 
             TextView dayText = new TextView(this);

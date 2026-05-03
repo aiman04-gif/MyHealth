@@ -2,13 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="theme_primary">#1D9AAB</color>
     <color name="background_page">#FFFFFF</color>
     <color name="surface_muted">#F5F5F5</color>
     <color name="divider_subtle">#E0E0E0</color>
     <color name="chip_background">#F0F0F0</color>
     <color name="text_primary">#FF000000</color>
     <color name="text_secondary">#FF757575</color>
-    <color name="action_primary">#FF212121</color>
+    <color name="action_primary">#1D9AAB</color>
     <color name="icon_tint_primary">#FF000000</color>
     <color name="icon_tint_secondary">#FF757575</color>
     <color name="hero_placeholder">#FFE8E8E8</color>

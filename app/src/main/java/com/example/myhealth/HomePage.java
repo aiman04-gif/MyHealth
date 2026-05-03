@@ -18,17 +18,22 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class HomePage extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!isUserLoggedIn()) {
+            openLogin();
+            return;
+        }
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home_page);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
 
@@ -44,5 +49,18 @@ public class HomePage extends AppCompatActivity {
             NavigationUI.setupWithNavController(bottomNav, navController);
         }
 
+    }
+
+    private boolean isUserLoggedIn() {
+        SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
+        return FirebaseAuth.getInstance().getCurrentUser() != null
+                || sp.getBoolean("logged_in", false);
+    }
+
+    private void openLogin() {
+        Intent intent = new Intent(HomePage.this, Login.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

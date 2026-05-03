@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2F5FF">
+    android:background="@color/background_page">
 
 
     <!-- 1. The Container for swapping fragments -->
@@ -24,12 +24,18 @@
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="@drawable/black_bg"
-        android:elevation="16dp"
-        app:elevation="0dp"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
+        android:background="@drawable/bg_bottom_navigation"
+        android:elevation="12dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="2dp"
+        app:elevation="12dp"
+        app:itemActiveIndicatorStyle="@null"
+        app:itemHorizontalTranslationEnabled="false"
+        app:itemIconSize="28dp"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemRippleColor="#E8F7F9"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_nav_menu" />
 

@@ -111,7 +111,7 @@
                     android:text="@string/view_details"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
-                    app:backgroundTint="@color/black" />
+                    app:backgroundTint="@color/theme_primary" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -141,7 +141,7 @@
             android:text="@string/nav_appointments"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            app:backgroundTint="@color/black" />
+            app:backgroundTint="@color/theme_primary" />
 
         <Space
             android:layout_width="10dp"
@@ -156,7 +156,7 @@
             android:text="@string/nav_statistics"
             android:textAllCaps="false"
             android:textColor="@color/text_primary"
-            app:strokeColor="@color/black" />
+            app:strokeColor="@color/theme_primary" />
 
         <Space
             android:layout_width="10dp"
@@ -171,7 +171,7 @@
             android:text="@string/nav_profile"
             android:textAllCaps="false"
             android:textColor="@color/text_primary"
-            app:strokeColor="@color/black" />
+            app:strokeColor="@color/theme_primary" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <!-- The soft background color -->
-    <solid android:color="#DDE4F0" />
+    <solid android:color="#E8F7F9" />
 
     <!-- 100dp ensures it is always a "pill" shape -->
     <corners android:radius="100dp" />

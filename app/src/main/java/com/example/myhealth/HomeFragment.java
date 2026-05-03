@@ -19,13 +19,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.smd_project_v1.DoctorDetailActivity;
+import androidx.navigation.Navigation;
 
 
 public class HomeFragment extends Fragment {
 
     private TextView tvName;
-    private View emergencyCall,nearbyHospitals, nearbyPharmacy, bookAppointment;
+    private View emergencyCall,nearbyHospitals, nearbyPharmacy, bookAppointment, upcomingConsultation;
     private CardView cardprofile;
 
 
@@ -65,8 +65,11 @@ public class HomeFragment extends Fragment {
         });
 
         bookAppointment.setOnClickListener(view->{
-            Intent intent = new Intent(requireContext(), DoctorDetailActivity.class);
-            startActivity(intent);
+            Navigation.findNavController(view).navigate(R.id.nav_doctors);
+        });
+
+        upcomingConsultation.setOnClickListener(view -> {
+            Navigation.findNavController(view).navigate(R.id.nav_appointments);
         });
 
         nearbyPharmacy.setOnClickListener(view->{
@@ -94,6 +97,7 @@ public class HomeFragment extends Fragment {
         nearbyHospitals=v.findViewById(R.id.nearbyHospitals);
         nearbyPharmacy=v.findViewById(R.id.nearbyPharmacy);
         bookAppointment=v.findViewById(R.id.bookAppointment);
+        upcomingConsultation=v.findViewById(R.id.upcomingConsultation);
         cardprofile=v.findViewById(R.id.cardProfile);
 
     }

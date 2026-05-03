@@ -1,6 +1,7 @@
 package com.example.myhealth;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -81,9 +82,9 @@ public class SignUp extends AppCompatActivity {
                             .child(uid)
                             .setValue(user)
                             .addOnSuccessListener(aVoid -> {
+                                saveUserSession(uid, email, name);
                                 Toast.makeText(this, "Account Created!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(SignUp.this, Login.class));
-                                finish();
+                                openHomePage();
                             })
                             .addOnFailureListener(e ->
                                     Toast.makeText(this, "DB Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
@@ -105,5 +106,22 @@ public class SignUp extends AppCompatActivity {
         etPassword=findViewById(R.id.etPassword);
         etCPassword=findViewById(R.id.etCPassword);
         btn_signUp=findViewById(R.id.btn_signup);
+    }
+
+    private void saveUserSession(String uid, String email, String name) {
+        SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
+        sp.edit()
+                .putBoolean("logged_in", true)
+                .putString("user_uid", uid)
+                .putString("user_email", email)
+                .putString("user_name", name)
+                .apply();
+    }
+
+    private void openHomePage() {
+        Intent intent = new Intent(SignUp.this, HomePage.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

@@ -75,6 +75,9 @@
     <string name="profile_menu_medical_history">Medical History</string>
     <string name="profile_menu_payment_methods">Payment Methods</string>
     <string name="profile_menu_support">Help &amp; Support</string>
+    <string name="logout">Logout</string>
+    <string name="logout_confirm_title">Logout?</string>
+    <string name="logout_confirm_message">You will need to sign in again to access your dashboard.</string>
 
     <string name="cd_back">Back</string>
     <string name="cd_favorite">Add to favorites</string>

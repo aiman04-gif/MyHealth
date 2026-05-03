@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2F5FF"
+    android:background="@color/background_page"
     android:id="@+id/main"
     tools:context=".MainActivity">
 
@@ -104,7 +104,9 @@
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:layout_marginTop="24dp"
-            android:background="@drawable/pill_bg">
+            android:background="@drawable/pill_bg"
+            android:clickable="true"
+            android:focusable="true">
 
             <ImageView
                 android:id="@+id/btn_icon"

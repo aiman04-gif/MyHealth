@@ -41,6 +41,10 @@ public class Login extends AppCompatActivity {
         });
         init();
         auth= FirebaseAuth.getInstance();
+        if (isUserLoggedIn()) {
+            openHomePage();
+            return;
+        }
         rtdb=FirebaseDatabase.getInstance(
                 "https://myhealth-b7de0-default-rtdb.firebaseio.com/"
         );
@@ -72,19 +76,8 @@ public class Login extends AppCompatActivity {
                                         }
 
                                         String name = snapshot.child("name").getValue(String.class);
-                                        // Save session
-                                        SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
-                                        sp.edit()
-                                                .putBoolean("logged_in", true)
-                                                .putString("user_uid", uid)
-                                                .putString("user_email", email)
-                                                .putString("user_name", name)
-                                                .apply();
-
-
-
-                                        startActivity(new Intent(Login.this, HomePage.class));
-                                        finish();
+                                        saveUserSession(uid, email, name);
+                                        openHomePage();
 
                                     })
                                     .addOnFailureListener(e -> {
@@ -111,5 +104,27 @@ public class Login extends AppCompatActivity {
         etEmail=findViewById(R.id.etEmail);
         etPassword=findViewById(R.id.etPassword);
         btn_login= findViewById(R.id.btn_login);
+    }
+
+    private boolean isUserLoggedIn() {
+        SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
+        return auth.getCurrentUser() != null || sp.getBoolean("logged_in", false);
+    }
+
+    private void saveUserSession(String uid, String email, String name) {
+        SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
+        sp.edit()
+                .putBoolean("logged_in", true)
+                .putString("user_uid", uid)
+                .putString("user_email", email)
+                .putString("user_name", name)
+                .apply();
+    }
+
+    private void openHomePage() {
+        Intent intent = new Intent(Login.this, HomePage.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

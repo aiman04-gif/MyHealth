@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <!-- The solid white fill -->
-    <solid android:color="#F2F5FF" />
+    <solid android:color="@color/white" />
 
     <!-- High radius for that modern, bubbly look -->
     <corners android:radius="44dp" />
