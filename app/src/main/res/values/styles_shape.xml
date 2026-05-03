@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bottom-only rounded corners for hero (matches ~12–16dp design) -->
+    <style name="ShapeAppearance.MyHealth.DoctorHero" parent="ShapeAppearance.Material3.Corner.Full">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomLeft">@dimen/corner_card</item>
+        <item name="cornerSizeBottomRight">@dimen/corner_card</item>
+    </style>
+</resources>
