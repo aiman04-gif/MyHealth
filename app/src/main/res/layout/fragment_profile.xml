@@ -89,8 +89,12 @@
             android:paddingVertical="6dp">
 
             <TextView
+                android:id="@+id/menu_personal_information"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:paddingHorizontal="18dp"
                 android:paddingVertical="14dp"
                 android:text="@string/profile_menu_personal_information"
@@ -103,8 +107,12 @@
                 android:background="@color/divider_subtle" />
 
             <TextView
+                android:id="@+id/menu_medical_history"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:paddingHorizontal="18dp"
                 android:paddingVertical="14dp"
                 android:text="@string/profile_menu_medical_history"
@@ -117,11 +125,15 @@
                 android:background="@color/divider_subtle" />
 
             <TextView
+                android:id="@+id/menu_payment_methods"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:paddingHorizontal="18dp"
                 android:paddingVertical="14dp"
-                android:text="@string/profile_menu_payment_methods"
+                android:text="@string/profile_menu_emergency_contact"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
@@ -131,11 +143,51 @@
                 android:background="@color/divider_subtle" />
 
             <TextView
+                android:id="@+id/menu_support"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:paddingHorizontal="18dp"
                 android:paddingVertical="14dp"
                 android:text="@string/profile_menu_support"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_subtle" />
+
+            <TextView
+                android:id="@+id/menu_notifications"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingHorizontal="18dp"
+                android:paddingVertical="14dp"
+                android:text="@string/profile_menu_notifications"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_subtle" />
+
+            <TextView
+                android:id="@+id/menu_privacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingHorizontal="18dp"
+                android:paddingVertical="14dp"
+                android:text="@string/profile_menu_privacy"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
         </LinearLayout>

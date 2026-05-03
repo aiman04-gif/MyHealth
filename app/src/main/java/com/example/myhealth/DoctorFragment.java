@@ -13,15 +13,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.example.smd_project_v1.DoctorDetailActivity;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+
 
 public class DoctorFragment extends Fragment {
 
+    private DoctorAdapter adapter;
+    private TextView emptyState;
 
 
     public DoctorFragment() {
@@ -42,19 +51,26 @@ public class DoctorFragment extends Fragment {
 
         RecyclerView rv = view.findViewById(R.id.rvDoctors);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        List<String> specializationTags=new ArrayList<>();
-        specializationTags.add("Pulmonologist");
-
-        // Create some dummy data
-        List<Doctor> doctors = new ArrayList<>();
-        doctors.add(new Doctor("Dr Sara Ali Khan",4,4.5,5,specializationTags,"xyz",300));
-        doctors.add(new Doctor("Dr Maheen",2,3.5,5,specializationTags,"xyz",250));
-        doctors.add(new Doctor("Dr Asad",1,2,5,specializationTags,"xyz",100));
+        emptyState = view.findViewById(R.id.text_empty_doctors);
 
         // Set the adapter
-        DoctorAdapter adapter = new DoctorAdapter(doctors, doctor -> {
+        adapter = new DoctorAdapter(new ArrayList<>(), doctor -> {
             Intent intent = new Intent(requireContext(), DoctorDetailActivity.class);
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_UID, doctor.getUid());
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_NAME, doctor.getName());
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_EMAIL, doctor.getEmail());
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_SPECIALTY, DoctorAdapter.getPrimarySpecialty(doctor));
+            if (doctor.getSpecializationTags() != null) {
+                intent.putStringArrayListExtra(
+                        DoctorDetailActivity.EXTRA_DOCTOR_SPECIALTIES,
+                        new ArrayList<>(doctor.getSpecializationTags())
+                );
+            }
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_ABOUT, doctor.getAbout());
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_EXPERIENCE, doctor.getExperienceYears());
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_RATING, doctor.getRating());
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_REVIEW_COUNT, doctor.getReviewCount());
+            intent.putExtra(DoctorDetailActivity.EXTRA_DOCTOR_FEE, doctor.getConsultationFeeUsd());
             startActivity(intent);
         });
         rv.setAdapter(adapter);
@@ -74,6 +90,35 @@ public class DoctorFragment extends Fragment {
             public void afterTextChanged(Editable s) {}
         });
 
+        loadDoctorsFromFirebase();
+
         return view;
+    }
+
+    private void loadDoctorsFromFirebase() {
+        FirebaseDatabase.getInstance().getReference("doctors")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Doctor> firebaseDoctors = new ArrayList<>();
+                        for (DataSnapshot child : snapshot.getChildren()) {
+                            Doctor doctor = child.getValue(Doctor.class);
+                            if (doctor != null) {
+                                if (doctor.getUid() == null || doctor.getUid().trim().isEmpty()) {
+                                    doctor.setUid(child.getKey());
+                                }
+                                firebaseDoctors.add(doctor);
+                            }
+                        }
+                        adapter.replaceData(firebaseDoctors);
+                        emptyState.setVisibility(firebaseDoctors.isEmpty() ? View.VISIBLE : View.GONE);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        emptyState.setText("Unable to load doctors");
+                        emptyState.setVisibility(View.VISIBLE);
+                    }
+                });
     }
 }

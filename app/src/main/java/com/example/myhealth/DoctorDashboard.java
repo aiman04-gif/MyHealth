@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -79,7 +80,7 @@ public class DoctorDashboard extends AppCompatActivity {
         rvAppointments.setLayoutManager(new LinearLayoutManager(this));
 
         appointmentList = new ArrayList<>();
-        adapter = new AppointmentAdapter(appointmentList);
+        adapter = new AppointmentAdapter(appointmentList, this::markAppointmentDone);
         rvAppointments.setAdapter(adapter);
 
         String docUid = sp.getString("doc_uid", "");
@@ -93,7 +94,9 @@ public class DoctorDashboard extends AppCompatActivity {
                         appointmentList.clear();
                         for (DataSnapshot data : snapshot.getChildren()) {
                             Appointment appt = data.getValue(Appointment.class);
-                            appointmentList.add(appt);
+                            if (appt != null) {
+                                appointmentList.add(appt);
+                            }
                         }
                         adapter.notifyDataSetChanged();
 
@@ -104,5 +107,23 @@ public class DoctorDashboard extends AppCompatActivity {
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {}
                 });
+    }
+
+    private void markAppointmentDone(Appointment appointment) {
+        if (appointment == null || appointment.getAppointmentId() == null) {
+            Toast.makeText(this, "Unable to update appointment", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        FirebaseDatabase.getInstance().getReference("appointments")
+                .child(appointment.getAppointmentId())
+                .child("status")
+                .setValue("Done")
+                .addOnSuccessListener(unused ->
+                        Toast.makeText(this, "Appointment marked as done", Toast.LENGTH_SHORT).show()
+                )
+                .addOnFailureListener(error ->
+                        Toast.makeText(this, "Unable to update appointment", Toast.LENGTH_SHORT).show()
+                );
     }
 }

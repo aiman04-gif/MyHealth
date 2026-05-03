@@ -17,10 +17,23 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.smd_project_v1.model.Doctor;
 import com.google.android.material.button.MaterialButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DoctorDetailActivity extends AppCompatActivity {
+
+    public static final String EXTRA_DOCTOR_UID = "doctor_uid";
+    public static final String EXTRA_DOCTOR_NAME = "doctor_name";
+    public static final String EXTRA_DOCTOR_EMAIL = "doctor_email";
+    public static final String EXTRA_DOCTOR_SPECIALTY = "doctor_specialty";
+    public static final String EXTRA_DOCTOR_SPECIALTIES = "doctor_specialties";
+    public static final String EXTRA_DOCTOR_ABOUT = "doctor_about";
+    public static final String EXTRA_DOCTOR_EXPERIENCE = "doctor_experience_years";
+    public static final String EXTRA_DOCTOR_RATING = "doctor_rating";
+    public static final String EXTRA_DOCTOR_REVIEW_COUNT = "doctor_review_count";
+    public static final String EXTRA_DOCTOR_FEE = "doctor_fee_usd";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,24 +41,37 @@ public class DoctorDetailActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_doctor_detail);
 
-        Doctor doctor = Doctor.sampleDetailDoctor();
-
         View root = findViewById(R.id.root_doctor_detail);
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(
-                    systemBars.left,
-                    systemBars.top,
-                    systemBars.right,
-                    systemBars.bottom
-            );
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        bindDoctor(doctor);
+        bindDoctor(readDoctorFromIntent());
     }
 
-    private void bindDoctor(Doctor doctor) {
+    private DoctorDisplay readDoctorFromIntent() {
+        Intent intent = getIntent();
+        List<String> tags = intent.getStringArrayListExtra(EXTRA_DOCTOR_SPECIALTIES);
+        if (tags == null || tags.isEmpty()) {
+            tags = new ArrayList<>();
+            tags.add(safeText(intent.getStringExtra(EXTRA_DOCTOR_SPECIALTY), "General Physician"));
+        }
+
+        return new DoctorDisplay(
+                intent.getStringExtra(EXTRA_DOCTOR_UID),
+                safeText(intent.getStringExtra(EXTRA_DOCTOR_NAME), "Doctor"),
+                safeText(intent.getStringExtra(EXTRA_DOCTOR_ABOUT), "Doctor details are not available yet."),
+                tags,
+                intent.getIntExtra(EXTRA_DOCTOR_EXPERIENCE, 0),
+                intent.getDoubleExtra(EXTRA_DOCTOR_RATING, 0.0),
+                intent.getIntExtra(EXTRA_DOCTOR_REVIEW_COUNT, 0),
+                intent.getIntExtra(EXTRA_DOCTOR_FEE, 0)
+        );
+    }
+
+    private void bindDoctor(DoctorDisplay doctor) {
         TextView name = findViewById(R.id.text_doctor_name);
         TextView subtitle = findViewById(R.id.text_doctor_specialty_exp);
         TextView rating = findViewById(R.id.text_rating);
@@ -58,7 +84,7 @@ public class DoctorDetailActivity extends AppCompatActivity {
         MaterialButton book = findViewById(R.id.button_book_appointment);
 
         name.setText(doctor.getName());
-        subtitle.setText(doctor.formatSpecialtyWithExperience(" • "));
+        subtitle.setText(doctor.formatSpecialtyWithExperience(" - "));
         rating.setText(doctor.formatRatingLine());
         about.setText(doctor.getAbout());
         fee.setText(doctor.formatFeePerSession("$"));
@@ -71,11 +97,14 @@ public class DoctorDetailActivity extends AppCompatActivity {
         );
         book.setOnClickListener(v -> {
             Intent intent = new Intent(this, BookAppointmentActivity.class);
+            intent.putExtra(EXTRA_DOCTOR_UID, doctor.getUid());
+            intent.putExtra(EXTRA_DOCTOR_NAME, doctor.getName());
+            intent.putExtra(EXTRA_DOCTOR_SPECIALTY, doctor.getPrimarySpecialty());
             startActivity(intent);
         });
     }
 
-    private void populateChipRow(LinearLayout container, Doctor doctor) {
+    private void populateChipRow(LinearLayout container, DoctorDisplay doctor) {
         container.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(container.getContext());
 
@@ -99,6 +128,74 @@ public class DoctorDetailActivity extends AppCompatActivity {
             chip.setLayoutParams(lp);
             container.addView(chip);
             first = false;
+        }
+    }
+
+    private String safeText(String value, String fallback) {
+        return value == null || value.trim().isEmpty() ? fallback : value;
+    }
+
+    private static class DoctorDisplay {
+        private final String uid;
+        private final String name;
+        private final String about;
+        private final List<String> specializationTags;
+        private final int experienceYears;
+        private final double rating;
+        private final int reviewCount;
+        private final int consultationFeeUsd;
+
+        DoctorDisplay(String uid, String name, String about, List<String> specializationTags,
+                      int experienceYears, double rating, int reviewCount, int consultationFeeUsd) {
+            this.uid = uid;
+            this.name = name;
+            this.about = about;
+            this.specializationTags = specializationTags;
+            this.experienceYears = experienceYears;
+            this.rating = rating;
+            this.reviewCount = reviewCount;
+            this.consultationFeeUsd = consultationFeeUsd;
+        }
+
+        String getUid() {
+            return uid;
+        }
+
+        String getName() {
+            return name;
+        }
+
+        String getAbout() {
+            return about;
+        }
+
+        List<String> getSpecializationTags() {
+            return specializationTags;
+        }
+
+        String getPrimarySpecialty() {
+            return specializationTags.isEmpty() ? "General Physician" : specializationTags.get(0);
+        }
+
+        String formatSpecialtyWithExperience(String separator) {
+            if (experienceYears <= 0) {
+                return getPrimarySpecialty();
+            }
+            return getPrimarySpecialty() + separator + experienceYears + " Years Exp.";
+        }
+
+        String formatRatingLine() {
+            if (rating <= 0) {
+                return "No reviews yet";
+            }
+            return rating + " (" + reviewCount + " reviews)";
+        }
+
+        String formatFeePerSession(String currencyPrefix) {
+            if (consultationFeeUsd <= 0) {
+                return "Fee not available";
+            }
+            return currencyPrefix + consultationFeeUsd + " / session";
         }
     }
 }

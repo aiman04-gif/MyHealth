@@ -17,8 +17,8 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
         void onDoctorClick(Doctor doctor);
     }
 
-    private List<Doctor> doctorList;
-    private List<Doctor> doctorListFull;
+    private final List<Doctor> doctorList;
+    private final List<Doctor> doctorListFull;
     private final OnDoctorClickListener listener;
 
     public DoctorAdapter(List<Doctor> doctorList, OnDoctorClickListener listener)
@@ -40,8 +40,8 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
     public void onBindViewHolder(@NonNull DoctorViewHolder holder, int position) {
         Doctor doc=doctorList.get(position);
 
-        holder.tvName.setText(doc.getName());
-        holder.tvSpeciality.setText(doc.getSpecializationTags().get(0));
+        holder.tvName.setText(safeText(doc.getName(), "Doctor"));
+        holder.tvSpeciality.setText(getPrimarySpecialty(doc));
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onDoctorClick(doc);
@@ -66,14 +66,33 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
         } else {
             text = text.toLowerCase();
             for (Doctor item : doctorListFull) {
-                // Filter by name or specialty
-                if (item.getName().toLowerCase().contains(text) ||
-                        item.getSpecializationTags().get(0).toLowerCase().contains(text)) {
+                String name = safeText(item.getName(), "").toLowerCase();
+                String specialty = getPrimarySpecialty(item).toLowerCase();
+                if (name.contains(text) || specialty.contains(text)) {
                     doctorList.add(item);
                 }
             }
         }
         notifyDataSetChanged();
+    }
+
+    public void replaceData(List<Doctor> doctors) {
+        doctorList.clear();
+        doctorList.addAll(doctors);
+        doctorListFull.clear();
+        doctorListFull.addAll(doctors);
+        notifyDataSetChanged();
+    }
+
+    public static String getPrimarySpecialty(Doctor doctor) {
+        if (doctor.getSpecializationTags() == null || doctor.getSpecializationTags().isEmpty()) {
+            return "General Physician";
+        }
+        return safeText(doctor.getSpecializationTags().get(0), "General Physician");
+    }
+
+    private static String safeText(String value, String fallback) {
+        return value == null || value.trim().isEmpty() ? fallback : value;
     }
 
     public static class DoctorViewHolder extends RecyclerView.ViewHolder{

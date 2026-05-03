@@ -1,16 +1,19 @@
 package com.example.smd_project_v1;
 
+import com.example.myhealth.Appointment;
+import com.example.myhealth.HomePage;
 import com.example.myhealth.R;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +23,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -31,8 +38,11 @@ public class BookAppointmentActivity extends AppCompatActivity {
     private String selectedTime;
     private MaterialButton selectedTimeSlotButton;
     private MaterialButton[] slotButtons;
+    private MaterialButton confirmButton;
 
     private TextView textSelectedDate;
+    private String doctorUid;
+    private String doctorName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +67,8 @@ public class BookAppointmentActivity extends AppCompatActivity {
         slotButtons = new MaterialButton[]{btn09, btn1030, btn12, btn14};
 
         ImageButton backButton = findViewById(R.id.button_back);
-        MaterialButton confirmButton = findViewById(R.id.button_confirm_booking);
+        confirmButton = findViewById(R.id.button_confirm_booking);
+        readDoctorExtras();
 
         backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
@@ -73,6 +84,12 @@ public class BookAppointmentActivity extends AppCompatActivity {
         }
 
         confirmButton.setOnClickListener(v -> confirmBookingOrToast());
+    }
+
+    private void readDoctorExtras() {
+        Intent intent = getIntent();
+        doctorUid = intent.getStringExtra(DoctorDetailActivity.EXTRA_DOCTOR_UID);
+        doctorName = intent.getStringExtra(DoctorDetailActivity.EXTRA_DOCTOR_NAME);
     }
 
     private void showDatePickerDialog() {
@@ -131,17 +148,80 @@ public class BookAppointmentActivity extends AppCompatActivity {
 
     private void confirmBookingOrToast() {
         if (selectedDate == null || selectedTimeSlotButton == null) {
-            Toast.makeText(this, R.string.toast_select_date_and_time, Toast.LENGTH_SHORT).show();
+            showAlert("Missing selection", getString(R.string.toast_select_date_and_time));
             return;
         }
-        openAppointmentsActivity();
+        if (doctorUid == null || doctorUid.trim().isEmpty()) {
+            showAlert("Doctor unavailable", "Please select a doctor again before booking.");
+            return;
+        }
+        saveAppointment();
     }
 
-    private void openAppointmentsActivity() {
+    private void saveAppointment() {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        SharedPreferences sp = getSharedPreferences("user_session", MODE_PRIVATE);
+        String patientUid = firebaseUser != null ? firebaseUser.getUid() : sp.getString("user_uid", "");
+        String patientName = sp.getString("user_name", "");
+
+        if (patientUid == null || patientUid.trim().isEmpty()) {
+            showAlert("Login required", "Please login again before booking an appointment.");
+            return;
+        }
+        if (patientName == null || patientName.trim().isEmpty()) {
+            patientName = firebaseUser != null && firebaseUser.getEmail() != null
+                    ? firebaseUser.getEmail()
+                    : "Patient";
+        }
+
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.US);
-        Intent intent = new Intent(this, AppointmentsActivity.class);
-        intent.putExtra("appointment_date", fmt.format(selectedDate.getTime()));
+        String date = fmt.format(selectedDate.getTime());
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("appointments").push();
+        String appointmentId = ref.getKey();
+        Appointment appointment = new Appointment(
+                appointmentId,
+                doctorUid,
+                doctorName,
+                patientUid,
+                patientName,
+                date,
+                selectedTime,
+                "Pending",
+                System.currentTimeMillis()
+        );
+
+        setSaving(true);
+        ref.setValue(appointment)
+                .addOnSuccessListener(unused -> openAppointmentsTab(date))
+                .addOnFailureListener(error -> {
+                    setSaving(false);
+                    showAlert("Booking failed", error.getMessage() != null
+                            ? error.getMessage()
+                            : "Unable to create appointment. Please try again.");
+                });
+    }
+
+    private void openAppointmentsTab(String date) {
+        Intent intent = new Intent(this, HomePage.class);
+        intent.putExtra("appointment_date", date);
         intent.putExtra("appointment_time", selectedTime);
+        intent.putExtra(HomePage.EXTRA_OPEN_TAB, HomePage.TAB_APPOINTMENTS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
+        finish();
+    }
+
+    private void setSaving(boolean saving) {
+        confirmButton.setEnabled(!saving);
+        confirmButton.setText(saving ? "Booking..." : getString(R.string.confirm_booking));
+    }
+
+    private void showAlert(String title, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 }

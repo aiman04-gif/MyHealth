@@ -4,23 +4,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class HomePage extends AppCompatActivity {
+
+    public static final String EXTRA_OPEN_TAB = "open_tab";
+    public static final String TAB_APPOINTMENTS = "appointments";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +46,57 @@ public class HomePage extends AppCompatActivity {
             // 3. Get the NavController from the host
             NavController navController = navHostFragment.getNavController();
 
-            // 4. Link the Bottom Navigation with the NavController
-            NavigationUI.setupWithNavController(bottomNav, navController);
+            setupBottomNavigation(bottomNav, navController);
+            setupBackToHome(bottomNav, navController);
+            openRequestedTab(bottomNav);
         }
 
+    }
+
+    private void setupBottomNavigation(BottomNavigationView bottomNav, NavController navController) {
+        bottomNav.setOnItemSelectedListener(item -> {
+            int destinationId = item.getItemId();
+            if (navController.getCurrentDestination() != null
+                    && navController.getCurrentDestination().getId() == destinationId) {
+                return true;
+            }
+
+            NavOptions options = new NavOptions.Builder()
+                    .setLaunchSingleTop(true)
+                    .setRestoreState(true)
+                    .setPopUpTo(navController.getGraph().getStartDestinationId(), false, true)
+                    .build();
+            navController.navigate(destinationId, null, options);
+            return true;
+        });
+
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            if (bottomNav.getSelectedItemId() != destination.getId()) {
+                bottomNav.getMenu().findItem(destination.getId()).setChecked(true);
+            }
+        });
+    }
+
+    private void setupBackToHome(BottomNavigationView bottomNav, NavController navController) {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (navController.getCurrentDestination() != null
+                        && navController.getCurrentDestination().getId() != R.id.nav_home) {
+                    bottomNav.setSelectedItemId(R.id.nav_home);
+                    return;
+                }
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
+    }
+
+    private void openRequestedTab(BottomNavigationView bottomNav) {
+        String requestedTab = getIntent().getStringExtra(EXTRA_OPEN_TAB);
+        if (TAB_APPOINTMENTS.equals(requestedTab)) {
+            bottomNav.post(() -> bottomNav.setSelectedItemId(R.id.nav_appointments));
+        }
     }
 
     private boolean isUserLoggedIn() {

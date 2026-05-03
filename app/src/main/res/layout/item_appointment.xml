@@ -53,6 +53,28 @@
                 android:text="May 24, 2024"
                 android:textColor="#627D98"
                 android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvApptStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Pending"
+                android:textColor="@color/theme_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMarkDone"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:minHeight="36dp"
+                android:text="Mark Done"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/theme_primary" />
         </LinearLayout>
 
         <ImageView

@@ -1,6 +1,5 @@
 package com.example.myhealth;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,23 +7,29 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.cardview.widget.CardView;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class HomeFragment extends Fragment {
 
     private TextView tvName;
+    private TextView textHomeAppointmentDate;
+    private TextView textHomeAppointmentDoctor;
     private View emergencyCall,nearbyHospitals, nearbyPharmacy, bookAppointment, upcomingConsultation;
     private CardView cardprofile;
 
@@ -56,6 +61,7 @@ public class HomeFragment extends Fragment {
         if (!name.isEmpty()) {
             tvName.setText("Hi "+name);
         }
+        loadRecentAppointment();
 
         emergencyCall.setOnClickListener(view->{
             Intent intent = new Intent(Intent.ACTION_DIAL);
@@ -93,6 +99,8 @@ public class HomeFragment extends Fragment {
 
     private void init(View v) {
         tvName=v.findViewById(R.id.userName);
+        textHomeAppointmentDate = v.findViewById(R.id.text_home_appointment_date);
+        textHomeAppointmentDoctor = v.findViewById(R.id.text_home_appointment_doctor);
         emergencyCall=v.findViewById(R.id.emergencyCall);
         nearbyHospitals=v.findViewById(R.id.nearbyHospitals);
         nearbyPharmacy=v.findViewById(R.id.nearbyPharmacy);
@@ -100,5 +108,66 @@ public class HomeFragment extends Fragment {
         upcomingConsultation=v.findViewById(R.id.upcomingConsultation);
         cardprofile=v.findViewById(R.id.cardProfile);
 
+    }
+
+    private void loadRecentAppointment() {
+        String patientUid = getPatientUid();
+        if (patientUid == null || patientUid.trim().isEmpty()) {
+            showNoAppointment();
+            return;
+        }
+
+        FirebaseDatabase.getInstance().getReference("appointments")
+                .orderByChild("patientUid")
+                .equalTo(patientUid)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Appointment latestAppointment = null;
+                        for (DataSnapshot child : snapshot.getChildren()) {
+                            Appointment appointment = child.getValue(Appointment.class);
+                            if (appointment == null) {
+                                continue;
+                            }
+                            if (latestAppointment == null
+                                    || appointment.getCreatedAt() >= latestAppointment.getCreatedAt()) {
+                                latestAppointment = appointment;
+                            }
+                        }
+
+                        if (latestAppointment == null) {
+                            showNoAppointment();
+                            return;
+                        }
+
+                        textHomeAppointmentDate.setText(safeText(latestAppointment.getDate(), "Date not set")
+                                + " - " + safeText(latestAppointment.getTime(), "Time not set"));
+                        textHomeAppointmentDoctor.setText(safeText(latestAppointment.getDoctorName(), "Doctor")
+                                + " - " + safeText(latestAppointment.getStatus(), "Pending"));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        showNoAppointment();
+                    }
+                });
+    }
+
+    private String getPatientUid() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            return user.getUid();
+        }
+        SharedPreferences sp = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        return sp.getString("user_uid", "");
+    }
+
+    private void showNoAppointment() {
+        textHomeAppointmentDate.setText("No appointment");
+        textHomeAppointmentDoctor.setText("Book a consultation");
+    }
+
+    private String safeText(String value, String fallback) {
+        return value == null || value.trim().isEmpty() ? fallback : value;
     }
 }
