@@ -78,6 +78,8 @@
     <string name="logout">Logout</string>
     <string name="logout_confirm_title">Logout?</string>
     <string name="logout_confirm_message">You will need to sign in again to access your dashboard.</string>
+    <string name="error_title">Something went wrong</string>
+    <string name="validation_title">Check your details</string>
 
     <string name="cd_back">Back</string>
     <string name="cd_favorite">Add to favorites</string>
